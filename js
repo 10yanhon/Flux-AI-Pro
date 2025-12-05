@@ -1785,97 +1785,43 @@ function handleUI(request) {
     </style>
 </head>
 <body>
-    <!-- ===== Password Overlay (放在 <body> 打开后立即插入) ===== -->
-<style>
-/* Password overlay styles (will be inserted once) */
-#passwordOverlay {
-  position: fixed;
-  inset: 0;
-  background: #e6f7ea; /* 浅绿色背景 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-.password-box {
-  background: #ffffff; /* 输入框白色 */
-  border: 1px solid #111; /* 黑细线边框 */
-  border-radius: 12px; /* 圆角 */
-  width: 360px;
-  max-width: 90%;
-  padding: 20px 20px 18px 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-  text-align: left;
-}
-.password-domain {
-  font-size: 14px;
-  font-weight: 700;
-  color: #000; /* 黑色字体 */
-  margin-bottom: 4px;
-}
-.password-welcome {
-  font-size: 12px;
-  color: #000; /* 黑色 */
-  margin-bottom: 6px;
-}
-.password-underline {
-  height: 1px;
-  background: #000;
-  margin-bottom: 10px;
-}
-.password-label {
-  display:block;
-  font-size: 13px;
-  color: #000;
-  margin-bottom: 6px;
-}
-.password-input {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #111;
-  background: #fff;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-.password-actions {
-  display:flex;
-  gap:8px;
-  margin-top:12px;
-  justify-content:flex-end;
-}
-.password-btn {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: none;
-  background: #111;
-  color: #fff;
-  cursor: pointer;
-  font-weight: 700;
-}
-.password-msg {
-  margin-top:8px;
-  color:#b91c1c;
-  font-size:13px;
-  min-height:18px;
-}
-</style>
+    <body>
 
-<div id="passwordOverlay" aria-hidden="false">
-  <div class="password-box" role="dialog" aria-label="password dialog">
-    <div class="password-domain" id="pwdDomain">example.com</div>
-    <div class="password-welcome">歡迎使用</div>
-    <div class="password-underline"></div>
-    <label class="password-label" for="pwdInput">請輸入密碼:</label>
-    <input id="pwdInput" class="password-input" type="password" autocomplete="current-password" placeholder="輸入密碼">
-    <div class="password-msg" id="pwdMsg"></div>
-    <div class="password-actions">
-      <button id="pwdCancel" class="password-btn" type="button" onclick="document.getElementById('pwdInput').value='';">取消</button>
-      <button id="pwdSubmit" class="password-btn" type="button">進入</button>
-    </div>
+<!-- ===== 网页访问密码输入框模块（放在 <body> 内第一行） ===== -->
+<div id="passwordOverlay" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+">
+  <div style="
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 300px;
+    text-align: center;
+  ">
+    <h2 style="margin-bottom: 10px;">请输入访问密码</h2>
+    <input
+      id="pagePasswordInput"
+      type="password"
+      placeholder="请输入密码"
+      style="width: 100%; padding: 10px; font-size: 16px; margin-bottom: 15px;"
+    />
+    <button style="width:100%; padding:10px; background:#007bff; color:white; border:none; border-radius:5px; font-size:16px;"
+      onclick="checkPagePassword()"
+    >
+      确认
+    </button>
   </div>
 </div>
-<!-- ===== 结束 Password Overlay ===== -->
+<!-- ===== 网页访问密码输入框模块 END ===== -->
+
 
     <div class="container">
         <h1>🎨 AI Image Generator <span class="badge">v${CONFIG.PROJECT_VERSION}</span></h1>
