@@ -1884,31 +1884,7 @@ function checkPagePassword() {
                     <button type="button" onclick="document.getElementById('image3').value='';">清除</button>
                 </div>
 
-                    <!-- ============================= -->
-                    <!--  图片上传区域（插在提示词下面） -->
-                    <!-- ============================= -->
 
-                    <div id="image-upload-area">
-                    <!-- 上传框1 -->
-                    <div class="image-uploader">
-                    <span class="plus">+</span>
-                    <input type="file" id="image1" accept="image/*">
-                    <img id="preview1" class="preview" style="display:none;">
-                </div>
-
-                    <!-- 上传框2 -->
-                    <div class="image-uploader">
-                    <span class="plus">+</span>
-                    <input type="file" id="image2" accept="image/*">
-                    <img id="preview2" class="preview" style="display:none;">
-                </div>
-
-                    <!-- 上传框3 -->
-                    <div class="image-uploader">
-                    <span class="plus">+</span>
-                    <input type="file" id="image3" accept="image/*">
-                    <img id="preview3" class="preview" style="display:none;">
-                    </div>
                 </div>
 
                     <label>負面提示詞:</label>
