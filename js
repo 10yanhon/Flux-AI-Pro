@@ -1743,40 +1743,82 @@ function handleUI(request) {
 <body>
     <body>
 
-<!-- ===== 网页访问密码输入框模块（放在 <body> 内第一行） ===== -->
-<div id="passwordOverlay" style="
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999;
-">
+<!-- 网页访问密码验证（浅绿色主题） -->
+<div id="passwordModal" style="
+  position:fixed; left:0; top:0; width:100%; height:100%;
+  background:#8fe6a2cc;  /* 半透明浅绿色 */
+  display:flex; justify-content:center; align-items:center; 
+  z-index:9999;">
+  
   <div style="
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 300px;
-    text-align: center;
+    background:#ffffff;
+    padding:25px 25px 30px 25px;
+    border-radius:16px;
+    width:300px;
+    text-align:center;
+    box-shadow:0 0 20px #00000030;
   ">
-    <h2 style="margin-bottom: 10px;">请输入访问密码</h2>
-    <input
-      id="pagePasswordInput"
-      type="password"
-      placeholder="请输入密码"
-      style="width: 100%; padding: 10px; font-size: 16px; margin-bottom: 15px;"
-    />
-    <button style="width:100%; padding:10px; background:#007bff; color:white; border:none; border-radius:5px; font-size:16px;"
-      onclick="checkPagePassword()"
-    >
-      确认
-    </button>
+    
+    <!-- 顶部标题 -->
+    <div style="
+      font-size:22px;
+      font-weight:bold;
+      color:#333;
+      letter-spacing:3px;  /* 字体间隔 */
+      margin-bottom:18px;
+    ">
+      欢迎使用
+    </div>
+
+    <!-- 密码输入框 -->
+    <input id="pagePasswordInput" type="password" placeholder="请输入访问密码" style="
+      width:100%;
+      padding:12px;
+      font-size:16px;
+      border-radius:10px;
+      border:1px solid #bbb;
+      outline:none;
+      margin-top:10px;
+      color:#000;
+      background:#fff;
+    ">
+
+    <!-- 按钮 -->
+    <button onclick="checkPagePassword()" style="
+      width:100%;
+      margin-top:20px;
+      padding:12px;
+      background:#79d68d;   /* 按钮绿色但更深一点 */
+      color:#000;
+      font-size:16px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+    ">进入</button>
+
+    <!-- 错误提示 -->
+    <div id="pwdError" style="
+      color:red;
+      margin-top:12px;
+      display:none;
+      font-size:14px;
+    ">密码错误，请重试</div>
+
   </div>
 </div>
-<!-- ===== 网页访问密码输入框模块 END ===== -->
+
+<script>
+function checkPagePassword() {
+  const correct = "123456";  // 你指定的密码
+  const input = document.getElementById('pagePasswordInput').value.trim();
+
+  if (input === correct) {
+    document.getElementById('passwordModal').style.display = 'none';
+  } else {
+    document.getElementById('pwdError').style.display = 'block';
+  }
+}
+</script>
 
 
     <div class="container">
