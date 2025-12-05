@@ -818,6 +818,120 @@ export default {
     const url = new URL(request.url);
     
     if (request.method === 'OPTIONS') {
+        // ======== 访问密码屏障（浅绿色背景 + 白色输入框 + 黑字黑边）========
+    const PASSWORD = "123456";   // 你设置的访问密码
+
+    // 允许访问的路径（例如：图片、CSS、JS 资源等）
+    const allowedPaths = ["/styles.css", "/favicon.ico"];
+
+    if (!allowedPaths.includes(url.pathname)) {
+        const cookie = request.headers.get("Cookie") || "";
+        const hasAuth = cookie.includes("site_auth=1");
+
+        // 尚未输入正确密码 → 显示访问密码页面
+        if (!hasAuth) {
+            const accessPage = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>访问密码</title>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background: #c8f7c5;   /* 浅绿色背景（不透明） */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial;
+}
+#box {
+    background: #ffffff;   /* 白色输入区域 */
+    padding: 30px 25px;
+    border: 2px solid black; /* 黑边 */
+    width: 85%;
+    max-width: 450px;
+    text-align: center;
+}
+#title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+input {
+    width: 95%;
+    padding: 12px;
+    font-size: 18px;
+    border: 2px solid black;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border: 2px solid black;
+    background: white;   /* 白色按钮 */
+    cursor: pointer;
+}
+button:hover {
+    opacity: 0.8;
+}
+</style>
+</head>
+<body>
+<div id="box">
+    <div id="title">欢迎使用</div>
+    <input id="pwd" type="password" placeholder="请输入访问密码" />
+    <button onclick="check()">确定</button>
+</div>
+
+<script>
+function check() {
+    const val = document.getElementById("pwd").value;
+    fetch("/checkpass", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({password: val})
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.ok) {
+            location.reload();
+        } else {
+            alert("密码错误！");
+        }
+    });
+}
+</script>
+</body>
+</html>`;
+            return new Response(accessPage, {
+                headers: {"Content-Type": "text/html"}
+            });
+        }
+    }
+
+    // 密码检查接口
+    if (url.pathname === "/checkpass") {
+        const body = await request.json();
+        if (body.password === PASSWORD) {
+            return new Response(JSON.stringify({ok:true}), {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Set-Cookie": "site_auth=1; Path=/;"
+                }
+            });
+        } else {
+            return new Response(JSON.stringify({ok:false}), {
+                headers: {"Content-Type": "application/json"}
+            });
+        }
+    }
+    // ======== 访问密码屏障结束 ========
+
       return new Response(null, { 
         status: 204, 
         headers: corsHeaders()
