@@ -1187,6 +1187,50 @@ function handleUI(request) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${CONFIG.PROJECT_NAME} v${CONFIG.PROJECT_VERSION}</title>
     <style>
+      /* ============================= */
+/*  图片上传区域样式（插入 style 内） */
+/* ============================= */
+
+#image-upload-area {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-uploader {
+    width: 100px;
+    height: 100px;
+    border: 2px dashed #888;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-uploader input[type="file"] {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
+.image-uploader .plus {
+    font-size: 32px;
+    color: #888;
+}
+
+.preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
