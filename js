@@ -1187,50 +1187,6 @@ function handleUI(request) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${CONFIG.PROJECT_NAME} v${CONFIG.PROJECT_VERSION}</title>
     <style>
-      /* ============================= */
-/*  图片上传区域样式（插入 style 内） */
-/* ============================= */
-
-#image-upload-area {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.image-uploader {
-    width: 100px;
-    height: 100px;
-    border: 2px dashed #888;
-    border-radius: 10px;
-    position: relative;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.image-uploader input[type="file"] {
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    position: absolute;
-    cursor: pointer;
-}
-
-.image-uploader .plus {
-    font-size: 32px;
-    color: #888;
-}
-
-.preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
@@ -1867,6 +1823,25 @@ function handleUI(request) {
                     
                     <label>提示詞:</label>
                     <textarea id="prompt" placeholder="描述你想生成的圖片..."></textarea>
+                    <!-- 图片上传控件（新增） -->
+                    <div style="margin-top:10px;">
+                    <label>图片 1：</label>
+                    <input type="file" id="image1" accept="image/*">
+                    <button type="button" onclick="document.getElementById('image1').value='';">清除</button>
+                </div>
+
+                    <div style="margin-top:10px;">
+                    <label>图片 2：</label>
+                    <input type="file" id="image2" accept="image/*">
+                    <button type="button" onclick="document.getElementById('image2').value='';">清除</button>
+                </div>
+
+                    <div style="margin-top:10px;">
+                    <label>图片 3：</label>
+                    <input type="file" id="image3" accept="image/*">
+                    <button type="button" onclick="document.getElementById('image3').value='';">清除</button>
+                </div>
+
                     <!-- ============================= -->
                     <!--  图片上传区域（插在提示词下面） -->
                     <!-- ============================= -->
@@ -2526,33 +2501,6 @@ function changePagePassword() {
         });
         
         console.log('%c🎨 v${CONFIG.PROJECT_VERSION} - Intelligent Adaptive HD', 'font-size: 16px; color: #f59e0b; font-weight: bold;');
-        // ============================================
-// 图片上传 + 预览功能初始化（插入 script 内）
-// ============================================
-
-function setupPreview(inputId, previewId) {
-    const input = document.getElementById(inputId);
-    const preview = document.getElementById(previewId);
-    const plus = preview.parentNode.querySelector(".plus");
-
-    input.addEventListener("change", () => {
-        const file = input.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                preview.src = e.target.result;
-                preview.style.display = "block";
-                plus.style.display = "none";
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-}
-
-setupPreview("image1", "preview1");
-setupPreview("image2", "preview2");
-setupPreview("image3", "preview3");
-
     </script>
 </body>
 </html>`;
