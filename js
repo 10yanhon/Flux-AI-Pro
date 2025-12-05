@@ -1884,9 +1884,6 @@ function checkPagePassword() {
                     <button type="button" onclick="document.getElementById('image3').value='';">清除</button>
                 </div>
 
-
-                </div>
-
                     <label>負面提示詞:</label>
                     <textarea id="negativePrompt" rows="2" placeholder="不想要的內容..."></textarea>
                     
