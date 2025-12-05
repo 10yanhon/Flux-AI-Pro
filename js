@@ -815,9 +815,6 @@ function corsHeaders(additionalHeaders = {}) {
 
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    
-    if (request.method === 'OPTIONS') {
         // ======== 访问密码屏障（浅绿色背景 + 白色输入框 + 黑字黑边）========
     const PASSWORD = "123456";   // 你设置的访问密码
 
@@ -931,6 +928,10 @@ function check() {
         }
     }
     // ======== 访问密码屏障结束 ========
+
+    const url = new URL(request.url);
+    
+    if (request.method === 'OPTIONS') {
 
       return new Response(null, { 
         status: 204, 
