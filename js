@@ -2396,6 +2396,33 @@ function handleUI(request) {
         });
         
         console.log('%c🎨 v${CONFIG.PROJECT_VERSION} - Intelligent Adaptive HD', 'font-size: 16px; color: #f59e0b; font-weight: bold;');
+        // ============================================
+// 图片上传 + 预览功能初始化（插入 script 内）
+// ============================================
+
+function setupPreview(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    const plus = preview.parentNode.querySelector(".plus");
+
+    input.addEventListener("change", () => {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src = e.target.result;
+                preview.style.display = "block";
+                plus.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+setupPreview("image1", "preview1");
+setupPreview("image2", "preview2");
+setupPreview("image3", "preview3");
+
     </script>
 </body>
 </html>`;
