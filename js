@@ -2012,6 +2012,28 @@ function handleUI(request) {
     </div>
 
     <script>
+        // ===== 密码保存与修改模块（在现有 <script> 内顶部） =====
+
+let pagePassword = localStorage.getItem("pagePassword") || "123456";
+
+function checkPagePassword() {
+  const input = document.getElementById("pagePasswordInput").value.trim();
+  if (input === pagePassword) {
+    document.getElementById("passwordOverlay").style.display = "none";
+  } else {
+    alert("密码错误");
+  }
+}
+
+function changePagePassword() {
+  const newPass = prompt("请输入新的访问密码：");
+  if (!newPass) return;
+
+  pagePassword = newPass.trim();
+  localStorage.setItem("pagePassword", pagePassword);
+  alert("密码已更新！");
+}
+
         const SIZES = ${JSON.stringify(CONFIG.PRESET_SIZES)};
         const API_URL = '${origin}/v1/images/generations';
         const STORAGE_KEY = '${CONFIG.HISTORY.STORAGE_KEY}';
