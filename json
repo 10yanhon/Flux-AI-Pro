@@ -1187,7 +1187,69 @@ function handleUI(request) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${CONFIG.PROJECT_NAME} v${CONFIG.PROJECT_VERSION}</title>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
+    #image-upload-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.img-box {
+  position: relative;
+  width: 30%;
+  aspect-ratio: 1/1; /* 自动正方形 */
+  border: 1px solid var(--border-color, #444);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--bg-color, transparent);
+}
+
+/* 加号 */
+.img-box .plus {
+  font-size: 32px;
+  color: white; /* 按你要求白色 */
+  pointer-events: none;
+}
+
+/* 隐藏 file input */
+.img-box .img-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* 预览图 */
+.img-box .preview {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 按你要求：完整显示 */
+  background-color: transparent;
+}
+
+/* 删除按钮（右上角） */
+.remove-btn {
+  display: none;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+  z-index: 5;
+  background: rgba(0,0,0,0.3);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  text-align: center;
+  line-height: 24px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
       body { 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
         background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); 
