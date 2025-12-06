@@ -817,6 +817,176 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     
+// ===== 密码屏障（插入点：紧接在 `const url = new URL(request.url);` 下一行） =====
+// 说明：仅此新增段，不包含你文件已有的任何其它内容。
+// 要求：每次进入必须输入密码；不使用 cookie；环境变量优先顺序：APP_PASSWORD -> PASSWORD -> PASSCODE
+if (url.pathname === "/") {
+  return new Response(`<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>访问验证</title>
+<style>
+  html,body{
+    height:100%;
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    background:#333333;
+    touch-action:none;
+  }
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:Arial,Helvetica,sans-serif;
+  }
+  .box{
+    background:#ffffff;
+    border:2px solid #000000;
+    border-radius:12px;
+    padding:28px;
+    width:360px;
+    max-width:92%;
+    box-sizing:border-box;
+    text-align:center;
+  }
+  .title{
+    font-size:22px;
+    font-weight:700;
+    color:#000000;
+    margin:0 0 18px 0;
+    letter-spacing:2px;
+    word-break:keep-all;
+  }
+  .pw{
+    width:100%;
+    padding:10px 12px;
+    margin-bottom:14px;
+    border:2px solid #000000;
+    border-radius:10px;
+    font-size:16px;
+    background:#ffffff;
+    color:#000000;
+    outline:none;
+    box-sizing:border-box;
+  }
+  .btn{
+    width:100%;
+    padding:10px 12px;
+    border:2px solid #000000;
+    border-radius:10px;
+    font-size:16px;
+    background:#ffffff;
+    color:#000000;
+    cursor:pointer;
+  }
+  .err{
+    color:#ff0000;
+    min-height:18px;
+    margin-top:12px;
+    font-size:14px;
+  }
+</style>
+</head>
+<body>
+  <div class="box" role="dialog" aria-modal="true" aria-label="密码验证">
+    <div class="title">欢迎使用</div>
+    <input id="pw" class="pw" type="password" placeholder="请输入访问密码" autocomplete="off"/>
+    <button class="btn" id="btn">确定</button>
+    <div id="err" class="err" aria-live="polite"></div>
+  </div>
+
+<script>
+  // 禁止页面缩放（安卓强制）
+  document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+
+  async function submitPw(){
+    const pwEl = document.getElementById('pw');
+    const errEl = document.getElementById('err');
+    errEl.textContent = '';
+    const v = (pwEl.value || '').toString().trim();
+    if(!v){ errEl.textContent = '请输入密码'; pwEl.focus(); return; }
+
+    try {
+      const r = await fetch('/check-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: v })
+      });
+
+      // expect JSON: { ok: true, html: "<!doctype>...</html>" } 或 { ok: false }
+      const j = await r.json();
+
+      if (j && j.ok && j.html) {
+        // 把后端返回的完整 UI HTML 写入当前 document —— 不再跳转到 '/'
+        document.open();
+        document.write(j.html);
+        document.close();
+      } else {
+        errEl.textContent = '密码错误';
+        pwEl.select();
+      }
+    } catch (e) {
+      errEl.textContent = '请求失败';
+    }
+  }
+
+  document.getElementById('btn').addEventListener('click', submitPw);
+  document.getElementById('pw').addEventListener('keydown', function(e){ if(e.key === 'Enter') submitPw(); });
+<\/script>
+</body>
+</html>`, {
+    status: 200,
+    headers: { "Content-Type": "text/html; charset=utf-8" }
+  });
+}
+
+// 校验接口（仅此段：读取 POST JSON 中的 password 或 pw 字段；使用环境变量；不设置 cookie）
+// 修改：校验成功时将调用 handleUI(request) 取得完整 UI HTML，并把 HTML 包到 JSON 返回给前端（前端会直接写入 document）
+if (url.pathname === "/check-password" && request.method === "POST") {
+  try {
+    const body = await request.json();
+    const input = (body.password || body.pw || "").toString().trim();
+    const real = (env && (env.APP_PASSWORD || env.PASSWORD || env.PASSCODE)) || "";
+
+    if (!real) {
+      return new Response(JSON.stringify({ ok: false, error: "no_password_set" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    if (input === real) {
+      // 生成 UI HTML（复用现有 handleUI），并返回给前端
+      try {
+        const uiResponse = await handleUI(request);
+        const uiHtml = await uiResponse.text();
+        return new Response(JSON.stringify({ ok: true, html: uiHtml }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: "ui_generation_failed" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    } else {
+      return new Response(JSON.stringify({ ok: false }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+  } catch (err) {
+    return new Response(JSON.stringify({ ok: false, error: "bad_request" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}
+// ===== 密码屏障结束 =====
     if (request.method === 'OPTIONS') {
       return new Response(null, { 
         status: 204, 
