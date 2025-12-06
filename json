@@ -1847,7 +1847,30 @@ function handleUI(request) {
                     
                     <label>提示詞:</label>
                     <textarea id="prompt" placeholder="描述你想生成的圖片..."></textarea>
-                    
+                    <!-- 图片上传区：插入在提示词 textarea 下面 -->
+<div id="image-upload-wrapper">
+  <div class="img-box">
+    <input type="file" accept="image/*" class="img-input">
+    <span class="plus">＋</span>
+    <span class="remove-btn">×</span>
+    <img class="preview" />
+  </div>
+
+  <div class="img-box">
+    <input type="file" accept="image/*" class="img-input">
+    <span class="plus">＋</span>
+    <span class="remove-btn">×</span>
+    <img class="preview" />
+  </div>
+
+  <div class="img-box">
+    <input type="file" accept="image/*" class="img-input">
+    <span class="plus">＋</span>
+    <span class="remove-btn">×</span>
+    <img class="preview" />
+  </div>
+</div>
+
                     <label>負面提示詞:</label>
                     <textarea id="negativePrompt" rows="2" placeholder="不想要的內容..."></textarea>
                     
