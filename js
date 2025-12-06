@@ -815,122 +815,114 @@ function corsHeaders(additionalHeaders = {}) {
 
 export default {
   async fetch(request, env, ctx) {
-        // ======== 访问密码屏障（浅绿色背景 + 白色输入框 + 黑字黑边）========
-    const PASSWORD = "123456";   // 你设置的访问密码
+    const url = new URL(request.url);
 
-    // 允许访问的路径（例如：图片、CSS、JS 资源等）
-    const allowedPaths = ["/styles.css", "/favicon.ico"];
+    // ======= CORS 预检（OPTIONS） =======
+    if (request.method === 'OPTIONS') {
+        return new Response(null, {
+            status: 204,
+            headers: corsHeaders()
+        });
+    }
 
-    if (!allowedPaths.includes(url.pathname)) {
+    // ======= 密码屏障（使用 Worker 环境变量） =======
+    // 环境变量支持：env.PASSWORD 或 env.PAGE_PASSWORD（优先使用其中存在的）
+    const CORRECT_PWD = (env.PAGE_PASSWORD && env.PAGE_PASSWORD.length > 0) ? env.PAGE_PASSWORD
+                     : (env.PASSWORD && env.PASSWORD.length > 0) ? env.PASSWORD
+                     : "";
+
+    // 如果没有在 env 中设置密码（CORRECT_PWD==""），则不拦截（保持向后兼容）
+    if (CORRECT_PWD) {
         const cookie = request.headers.get("Cookie") || "";
-        const hasAuth = cookie.includes("site_auth=1");
+        const isAuthed = cookie.includes("site_auth=1");
 
-        // 尚未输入正确密码 → 显示访问密码页面
-        if (!hasAuth) {
-            const accessPage = `
-<!DOCTYPE html>
+        // 允许直接访问静态资源（根据需要可扩充）
+        const allowStatic = [
+            "/favicon.ico",
+            "/robots.txt"
+        ];
+        // 允许 PATH 前缀（例如 /static/ /assets/ /v1/ api），如果你有特定 API 路由请在此添加
+        const allowPrefixes = ["/v1/", "/api/", "/static/", "/assets/"];
+
+        const path = url.pathname;
+
+        function isAllowedPath(p) {
+            if (allowStatic.includes(p)) return true;
+            for (const pref of allowPrefixes) if (p.startsWith(pref)) return true;
+            return false;
+        }
+
+        // 登录校验接口（前端会 POST 到 /check-password）
+        if (path === "/check-password" && request.method === "POST") {
+            try {
+                const body = await request.json();
+                const input = (body.password || "").toString().trim();
+
+                if (input === CORRECT_PWD) {
+                    // 设置 cookie 并返回成功
+                    return new Response(JSON.stringify({ ok: true }), {
+                        status: 200,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Set-Cookie": "site_auth=1; Path=/; Max-Age=86400; HttpOnly"
+                        }
+                    });
+                } else {
+                    return new Response(JSON.stringify({ ok: false }), {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+            } catch (e) {
+                return new Response(JSON.stringify({ ok: false }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+        }
+
+        // 已授权或访问允许路径 → 继续后面的路由逻辑
+        if (isAuthed || isAllowedPath(path) ) {
+            // pass through to remaining handler (do nothing here)
+        } else {
+            // 返回完整的密码输入页面（覆盖整页，实心浅绿色背景）
+            const html = `<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8" />
-<title>访问密码</title>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>訪問密碼</title>
 <style>
-body {
-    margin: 0;
-    padding: 0;
-    background: #c8f7c5;   /* 浅绿色背景（不透明） */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: Arial;
-}
-#box {
-    background: #ffffff;   /* 白色输入区域 */
-    padding: 30px 25px;
-    border: 2px solid black; /* 黑边 */
-    width: 85%;
-    max-width: 450px;
-    text-align: center;
-}
-#title {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 25px;
-}
-input {
-    width: 95%;
-    padding: 12px;
-    font-size: 18px;
-    border: 2px solid black;
-    margin-bottom: 20px;
-    box-sizing: border-box;
-}
-button {
-    width: 100%;
-    padding: 12px;
-    font-size: 18px;
-    border: 2px solid black;
-    background: white;   /* 白色按钮 */
-    cursor: pointer;
-}
-button:hover {
-    opacity: 0.8;
-}
+  html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif}
+  body{background:#c8f7c5;display:flex;align-items:center;justify-content:center}
+  #box{background:#fff;border:1px solid #000;padding:28px;border-radius:12px;width:90%;max-width:420px;text-align:center;box-sizing:border-box}
+  #title{font-size:22px;font-weight:700;color:#111;margin-bottom:16px}
+  input{width:100%;padding:12px;font-size:16px;border:1px solid #000;border-radius:10px;box-sizing:border-box}
+  button{width:100%;padding:12px;margin-top:14px;font-size:16px;border:1px solid #000;background:#fff;border-radius:10px;cursor:pointer}
 </style>
 </head>
 <body>
-<div id="box">
+  <div id="box">
     <div id="title">欢迎使用</div>
     <input id="pwd" type="password" placeholder="请输入访问密码" />
-    <button onclick="check()">确定</button>
-</div>
-
+    <button onclick="submitPwd()">确定</button>
+  </div>
 <script>
-function check() {
-    const val = document.getElementById("pwd").value;
-    fetch("/checkpass", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({password: val})
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d.ok) {
-            location.reload();
-        } else {
-            alert("密码错误！");
-        }
-    });
+async function submitPwd(){
+  const v = document.getElementById('pwd').value.trim();
+  if(!v) return;
+  try{
+    const res = await fetch('/check-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:v})});
+    const j = await res.json();
+    if(j.ok){ location.reload(); } else { alert('密码错误'); document.getElementById('pwd').value=''; document.getElementById('pwd').focus(); }
+  }catch(e){ alert('网络错误'); }
 }
+document.getElementById('pwd').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ submitPwd(); }});
+document.getElementById('pwd').focus();
 </script>
-</body>
-</html>`;
-            return new Response(accessPage, {
-                headers: {"Content-Type": "text/html"}
-            });
+</body></html>`;
+            return new Response(html, { headers: { "Content-Type": "text/html;charset=utf-8" }});
         }
     }
-
-    // 密码检查接口
-    if (url.pathname === "/checkpass") {
-        const body = await request.json();
-        if (body.password === PASSWORD) {
-            return new Response(JSON.stringify({ok:true}), {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Set-Cookie": "site_auth=1; Path=/;"
-                }
-            });
-        } else {
-            return new Response(JSON.stringify({ok:false}), {
-                headers: {"Content-Type": "application/json"}
-            });
-        }
-    }
-    // ======== 访问密码屏障结束 ========
-
-    const url = new URL(request.url);
-    
+    // ======= password checks end =======
+ 
     if (request.method === 'OPTIONS') {
 
       return new Response(null, { 
