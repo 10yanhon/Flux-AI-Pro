@@ -1904,6 +1904,40 @@ function handleUI(request) {
     </div>
 
     <script>
+        document.querySelectorAll(".img-box").forEach((box, index) => {
+  const input = box.querySelector(".img-input");
+  const preview = box.querySelector(".preview");
+  const plus = box.querySelector(".plus");
+  const removeBtn = box.querySelector(".remove-btn");
+
+  // 选择图片
+  input.addEventListener("change", function () {
+    if (this.files && this.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+        plus.style.display = "none";
+        removeBtn.style.display = "block";
+      };
+      reader.readAsDataURL(this.files[0]);
+
+      // 🔥关键：强制返回页面（解决停留图库问题）
+      setTimeout(() => document.body.focus(), 50);
+    }
+  });
+
+  // 删除图片
+  removeBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    input.value = "";
+    preview.src = "";
+    preview.style.display = "none";
+    plus.style.display = "block";
+    removeBtn.style.display = "none";
+  });
+});
+
         const SIZES = ${JSON.stringify(CONFIG.PRESET_SIZES)};
         const API_URL = '${origin}/v1/images/generations';
         const STORAGE_KEY = '${CONFIG.HISTORY.STORAGE_KEY}';
